@@ -29,7 +29,7 @@ class DashboardView(QWidget):
         self._greeting = QLabel("Tableau de bord")
         self._greeting.setStyleSheet("font-size: 24px; font-weight: 700;")
         self._date_lbl = QLabel()
-        self._date_lbl.setStyleSheet("color: #9AA0C4; font-size: 13px;")
+        self._date_lbl.setStyleSheet("color: #64748B; font-size: 13px;")
         self._date_lbl.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         greet_row.addWidget(self._greeting)
         greet_row.addWidget(self._date_lbl, 1)
@@ -45,10 +45,10 @@ class DashboardView(QWidget):
         cards_grid = QGridLayout()
         cards_grid.setSpacing(16)
 
-        self._card_revenue  = StatCard("Chiffre d'affaires (Aujourd'hui)", "0.000 TND", "💰", "#7B8CDE")
-        self._card_sales    = StatCard("Ventes (Aujourd'hui)", "0", "🧾", "#43A047")
-        self._card_products = StatCard("Produits actifs", "0", "📦", "#FB8C00")
-        self._card_low      = StatCard("Stock faible", "0", "⚠️", "#E53935")
+        self._card_revenue  = StatCard("Chiffre d'affaires (Aujourd'hui)", "0.000 TND", "💰", "#00C48C")
+        self._card_sales    = StatCard("Ventes (Aujourd'hui)", "0", "🧾", "#00C48C")
+        self._card_products = StatCard("Produits actifs", "0", "📦", "#0EA5E9")
+        self._card_low      = StatCard("Stock faible", "0", "⚠️", "#EF4444")
 
         cards_grid.addWidget(self._card_revenue,  0, 0)
         cards_grid.addWidget(self._card_sales,    0, 1)
@@ -59,9 +59,9 @@ class DashboardView(QWidget):
         # Monthly KPIs
         month_row = QHBoxLayout()
         month_row.setSpacing(16)
-        self._card_month    = StatCard("CA du mois", "0.000 TND", "📈", "#00BCD4")
-        self._card_inv_val  = StatCard("Valeur du stock", "0.000 TND", "🏭", "#9C27B0")
-        self._card_expenses = StatCard("Dépenses du mois", "0.000 TND", "💸", "#FF5722")
+        self._card_month    = StatCard("CA du mois", "0.000 TND", "📈", "#00C48C")
+        self._card_inv_val  = StatCard("Valeur du stock", "0.000 TND", "🏭", "#0EA5E9")
+        self._card_expenses = StatCard("Dépenses du mois", "0.000 TND", "💸", "#F59E0B")
         month_row.addWidget(self._card_month)
         month_row.addWidget(self._card_inv_val)
         month_row.addWidget(self._card_expenses)
@@ -126,8 +126,8 @@ class DashboardView(QWidget):
         self._card_sales.set_value(str(daily.get("total_sales", 0)))
 
         inv = StockController.get_inventory_value()
-        self._card_products.set_value(str(inv.get("product_count", 0)))
-        self._card_low.set_value(str(inv.get("low_stock_count", 0)))
+        self._card_products.set_value(str(inv.get("product_count") or 0))
+        self._card_low.set_value(str(inv.get("low_stock_count") or 0))
         self._card_inv_val.set_value(format_price(inv.get("sale_value", 0)))
 
         monthly_sales = SaleController.get_daily_summary.__func__ if False else None
@@ -167,7 +167,7 @@ class DashboardView(QWidget):
 
     def _make_stock_row(self, product: dict) -> QFrame:
         frame = QFrame()
-        frame.setStyleSheet("background: #252848; border-radius: 8px; padding: 4px 0;")
+        frame.setObjectName("dashRow")
         row = QHBoxLayout(frame)
         row.setContentsMargins(12, 8, 12, 8)
 
@@ -185,12 +185,12 @@ class DashboardView(QWidget):
 
     def _make_top_row(self, rank: int, product: dict) -> QFrame:
         frame = QFrame()
-        frame.setStyleSheet("background: #252848; border-radius: 8px;")
+        frame.setObjectName("dashRow")
         row = QHBoxLayout(frame)
         row.setContentsMargins(12, 8, 12, 8)
 
         rank_lbl = QLabel(f"#{rank}")
-        rank_lbl.setStyleSheet("color: #9AA0C4; font-weight: 700; min-width: 28px;")
+        rank_lbl.setStyleSheet("font-weight: 700; min-width: 28px; color: #64748B;")
 
         name = QLabel(product["name"])
         name.setStyleSheet("font-weight: 600;")
