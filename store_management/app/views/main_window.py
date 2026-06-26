@@ -1,3 +1,4 @@
+from __future__ import annotations
 import sys
 from pathlib import Path
 from PySide6.QtWidgets import (
@@ -57,7 +58,7 @@ class MainWindow(QMainWindow):
         logo_layout = QVBoxLayout(logo_widget)
         logo_layout.setContentsMargins(16, 20, 16, 8)
         logo_icon = QLabel("🏪")
-        logo_icon.setStyleSheet("font-size: 36px;")
+        logo_icon.setObjectName("sidebarLogo")
         logo_title = QLabel(APP_NAME)
         logo_title.setObjectName("sidebarTitle")
         logo_version = QLabel(f"v{APP_VERSION}")
@@ -106,31 +107,34 @@ class MainWindow(QMainWindow):
         nav_layout.addStretch()
         sidebar_layout.addWidget(nav_scroll_widget, 1)
 
-        # User info at bottom of sidebar
+        # User info + logout at bottom of sidebar
         user_frame = QFrame()
-        user_frame.setStyleSheet("background: #0E1018; border-top: 1px solid #2D3055;")
-        user_layout = QHBoxLayout(user_frame)
-        user_layout.setContentsMargins(12, 10, 12, 10)
+        user_frame.setObjectName("userPanel")
+        user_layout = QVBoxLayout(user_frame)
+        user_layout.setContentsMargins(12, 12, 12, 12)
+        user_layout.setSpacing(8)
 
         user = AuthController.current_user()
+        top_row = QHBoxLayout()
         avatar = QLabel("👤")
-        avatar.setStyleSheet("font-size: 24px;")
+        avatar.setStyleSheet("font-size: 22px; background: transparent;")
         info = QVBoxLayout()
+        info.setSpacing(2)
         name_lbl = QLabel(user.get("full_name", ""))
-        name_lbl.setStyleSheet("font-weight: 600; font-size: 13px;")
+        name_lbl.setObjectName("userNameLabel")
         role_lbl = QLabel("Administrateur" if user.get("role") == "admin" else "Caissier")
-        role_lbl.setStyleSheet("color: #9AA0C4; font-size: 11px;")
+        role_lbl.setObjectName("userRoleLabel")
         info.addWidget(name_lbl)
         info.addWidget(role_lbl)
+        top_row.addWidget(avatar)
+        top_row.addLayout(info, 1)
+        user_layout.addLayout(top_row)
 
-        btn_logout = QPushButton("⏻")
-        btn_logout.setObjectName("btnIcon")
-        btn_logout.setToolTip("Déconnexion")
+        btn_logout = QPushButton("⏻  Déconnexion")
+        btn_logout.setObjectName("btnLogout")
         btn_logout.clicked.connect(self._logout)
-
-        user_layout.addWidget(avatar)
-        user_layout.addLayout(info, 1)
         user_layout.addWidget(btn_logout)
+
         sidebar_layout.addWidget(user_frame)
 
         root.addWidget(self._sidebar)
@@ -153,7 +157,7 @@ class MainWindow(QMainWindow):
         topbar_layout.addStretch()
 
         self._clock_lbl = QLabel()
-        self._clock_lbl.setStyleSheet("color: #9AA0C4; font-size: 13px;")
+        self._clock_lbl.setObjectName("clockLabel")
         topbar_layout.addWidget(self._clock_lbl)
         content_layout.addWidget(self._topbar)
 

@@ -1,3 +1,4 @@
+from __future__ import annotations
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QLineEdit, QFrame, QScrollArea, QMessageBox, QDialog,
@@ -13,6 +14,7 @@ from app.controllers.auth_controller import AuthController
 from app.database.connection import db
 from app.utils.helpers import format_price
 from app.utils.exporter import generate_receipt_pdf
+from app.utils.barcode_scanner import BarcodeScannerDialog, SCANNER_AVAILABLE
 import subprocess, sys
 
 
@@ -36,23 +38,36 @@ class POSView(QWidget):
 
         # Search bar
         search_row = QHBoxLayout()
+        search_row.setSpacing(8)
         self._search_input = QLineEdit()
-        self._search_input.setPlaceholderText("🔍  Scanner QR / Saisir nom ou code-barres...")
-        self._search_input.setMinimumHeight(52)
+        self._search_input.setPlaceholderText("🔍  Saisir nom, code-barres ou scanner…")
+        self._search_input.setMinimumHeight(48)
         self._search_input.setObjectName("searchBar")
         self._search_input.returnPressed.connect(self._on_scan)
         self._search_input.textChanged.connect(self._live_search)
 
-        btn_scan = QPushButton("⊞ Scanner")
-        btn_scan.setMinimumHeight(52)
+        btn_scan = QPushButton("⊞  Rechercher")
+        btn_scan.setMinimumHeight(48)
+        btn_scan.setMinimumWidth(130)
         btn_scan.clicked.connect(self._on_scan)
+
+        btn_cam = QPushButton("📷  Caméra")
+        btn_cam.setMinimumHeight(48)
+        btn_cam.setMinimumWidth(110)
+        btn_cam.setObjectName("btnWarning")
+        btn_cam.setToolTip("Scanner un code-barres avec la caméra")
+        if not SCANNER_AVAILABLE:
+            btn_cam.setToolTip("Installer opencv-python et pyzbar pour activer le scanner caméra")
+        btn_cam.clicked.connect(self._open_camera_scanner)
+
         search_row.addWidget(self._search_input, 1)
         search_row.addWidget(btn_scan)
+        search_row.addWidget(btn_cam)
         left_layout.addLayout(search_row)
 
         # Product grid (results)
         self._result_label = QLabel("Résultats de recherche")
-        self._result_label.setStyleSheet("font-size: 13px; color: #9AA0C4;")
+        self._result_label.setStyleSheet("font-size: 13px; color: #64748B;")
         left_layout.addWidget(self._result_label)
 
         scroll = QScrollArea()
@@ -75,7 +90,7 @@ class POSView(QWidget):
         cart_layout.setSpacing(0)
 
         cart_header = QFrame()
-        cart_header.setStyleSheet("background: #12141F; border-bottom: 1px solid #2D3055;")
+        cart_header.setObjectName("cartHeader")
         ch_layout = QHBoxLayout(cart_header)
         ch_layout.setContentsMargins(16, 14, 16, 14)
         cart_title = QLabel("🛒  Panier")
@@ -102,17 +117,16 @@ class POSView(QWidget):
 
         # Total
         total_frame = QFrame()
-        total_frame.setObjectName("cartTotal")
-        total_frame.setStyleSheet("background: #7B8CDE; border-radius: 12px; margin: 8px;")
+        total_frame.setObjectName("cartTotalPanel")
         tf_layout = QVBoxLayout(total_frame)
+        tf_layout.setSpacing(4)
 
         self._subtotal_lbl = QLabel("Sous-total : 0.000 TND")
-        self._subtotal_lbl.setStyleSheet("color: rgba(255,255,255,0.75); font-size: 12px; background: transparent;")
+        self._subtotal_lbl.setObjectName("cartSubtotalLabel")
         self._discount_lbl = QLabel("")
-        self._discount_lbl.setStyleSheet("color: rgba(255,255,255,0.75); font-size: 12px; background: transparent;")
+        self._discount_lbl.setObjectName("cartSubtotalLabel")
         self._total_lbl = QLabel("TOTAL : 0.000 TND")
         self._total_lbl.setObjectName("cartTotalLabel")
-        self._total_lbl.setStyleSheet("font-size: 22px; font-weight: 700; color: white; background: transparent;")
 
         tf_layout.addWidget(self._subtotal_lbl)
         tf_layout.addWidget(self._discount_lbl)
@@ -157,6 +171,14 @@ class POSView(QWidget):
 
     # ── Search / Scan ─────────────────────────────────────────
 
+    def _open_camera_scanner(self):
+        dlg = BarcodeScannerDialog(self)
+        if dlg.exec():
+            code = dlg.get_result()
+            if code:
+                self._search_input.setText(code)
+                self._on_scan()
+
     def _on_scan(self):
         code = self._search_input.text().strip()
         if not code:
@@ -194,8 +216,8 @@ class POSView(QWidget):
     def _make_product_card(self, product: dict) -> QFrame:
         card = QFrame()
         card.setStyleSheet("""
-            QFrame { background: #1E2235; border: 1px solid #2D3055; border-radius: 10px; }
-            QFrame:hover { border-color: #7B8CDE; background: #252848; }
+            QFrame { background: #161C27; border: 1px solid #1E2D3D; border-radius: 10px; }
+            QFrame:hover { border-color: #00C48C; background: #192330; }
         """)
         card.setCursor(Qt.PointingHandCursor)
         row = QHBoxLayout(card)
@@ -203,18 +225,18 @@ class POSView(QWidget):
 
         info = QVBoxLayout()
         name = QLabel(product["name"])
-        name.setStyleSheet("font-weight: 600; font-size: 14px;")
+        name.setStyleSheet("font-weight: 600; font-size: 14px; color: #E2E8F0;")
         cat = QLabel(product.get("category_name") or "—")
-        cat.setStyleSheet("color: #9AA0C4; font-size: 12px;")
+        cat.setStyleSheet("color: #64748B; font-size: 12px;")
         info.addWidget(name)
         info.addWidget(cat)
 
         right = QVBoxLayout()
         right.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         price = QLabel(format_price(product["sale_price"]))
-        price.setStyleSheet("font-weight: 700; color: #7B8CDE; font-size: 15px;")
+        price.setStyleSheet("font-weight: 700; color: #00C48C; font-size: 15px;")
         stock = QLabel(f"Stock: {product['stock_quantity']:.1f}")
-        stock.setStyleSheet("color: #9AA0C4; font-size: 11px;")
+        stock.setStyleSheet("color: #64748B; font-size: 11px;")
         right.addWidget(price)
         right.addWidget(stock)
 
@@ -288,16 +310,16 @@ class POSView(QWidget):
 
     def _make_cart_row(self, idx: int, item: dict) -> QFrame:
         frame = QFrame()
-        frame.setStyleSheet("background: #1E2235; border-radius: 8px;")
+        frame.setStyleSheet("background: #161C27; border-radius: 8px; border: 1px solid #1E2D3D;")
         row = QHBoxLayout(frame)
         row.setContentsMargins(10, 8, 10, 8)
 
         info = QVBoxLayout()
         name = QLabel(item["name"])
-        name.setStyleSheet("font-weight: 600; font-size: 13px;")
+        name.setStyleSheet("font-weight: 600; font-size: 13px; color: #E2E8F0;")
         unit_label = "kg" if item["unit_type"] == "kg" else ("L" if item["unit_type"] == "litre" else "u")
         sub = QLabel(f"{format_price(item['unit_price'])} / {unit_label}")
-        sub.setStyleSheet("color: #9AA0C4; font-size: 11px;")
+        sub.setStyleSheet("color: #64748B; font-size: 11px;")
         info.addWidget(name)
         info.addWidget(sub)
 
@@ -323,7 +345,7 @@ class POSView(QWidget):
         qty_row.addWidget(btn_p)
 
         total_lbl = QLabel(format_price(item["unit_price"] * item["quantity"]))
-        total_lbl.setStyleSheet("font-weight: 700; color: #7B8CDE; min-width: 90px;")
+        total_lbl.setStyleSheet("font-weight: 700; color: #00C48C; min-width: 90px;")
         total_lbl.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
 
         btn_del = QPushButton("🗑")

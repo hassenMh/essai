@@ -1,3 +1,4 @@
+from __future__ import annotations
 from PySide6.QtWidgets import QTableWidget, QTableWidgetItem, QHeaderView, QAbstractItemView
 from PySide6.QtCore import Qt
 

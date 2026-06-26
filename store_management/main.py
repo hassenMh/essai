@@ -22,7 +22,12 @@ def main():
     app.setAttribute(Qt.AA_EnableHighDpiScaling, True)
     app.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
 
-    font = QFont("Segoe UI", 10)
+    import platform
+    font_family = "Segoe UI" if platform.system() == "Windows" else (
+        "SF Pro Display" if platform.system() == "Darwin" else "Ubuntu"
+    )
+    font = QFont(font_family, 10)
+    font.setStyleStrategy(QFont.PreferAntialias)
     app.setFont(font)
 
     # Init DB

@@ -1,3 +1,4 @@
+from __future__ import annotations
 from app.database.connection import db
 from app.controllers.auth_controller import AuthController
 from app.controllers.product_controller import ProductController

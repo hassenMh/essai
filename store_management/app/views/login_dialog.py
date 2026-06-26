@@ -22,18 +22,21 @@ class LoginDialog(QDialog):
 
         # Header band
         header = QFrame()
-        header.setStyleSheet("background: #7B8CDE; border-radius: 0;")
-        header.setFixedHeight(160)
+        header.setStyleSheet(
+            "background: qlineargradient(x1:0,y1:0,x2:1,y2:1,"
+            "stop:0 #00C48C, stop:1 #00875A); border-radius: 0;"
+        )
+        header.setFixedHeight(170)
         h_layout = QVBoxLayout(header)
         h_layout.setAlignment(Qt.AlignCenter)
 
         icon = QLabel("🏪")
         icon.setAlignment(Qt.AlignCenter)
-        icon.setStyleSheet("font-size: 52px; background: transparent;")
+        icon.setStyleSheet("font-size: 54px; background: transparent;")
 
         title = QLabel("StoreManager Pro")
         title.setAlignment(Qt.AlignCenter)
-        title.setStyleSheet("font-size: 22px; font-weight: 700; color: white; background: transparent;")
+        title.setStyleSheet("font-size: 22px; font-weight: 700; color: white; background: transparent; letter-spacing: 1px;")
 
         h_layout.addWidget(icon)
         h_layout.addWidget(title)
@@ -47,18 +50,18 @@ class LoginDialog(QDialog):
 
         subtitle = QLabel("Connexion à votre espace")
         subtitle.setAlignment(Qt.AlignCenter)
-        subtitle.setStyleSheet("font-size: 15px; color: #9AA0C4; margin-bottom: 8px;")
+        subtitle.setStyleSheet("font-size: 15px; color: #64748B; margin-bottom: 8px;")
         form_layout.addWidget(subtitle)
 
         lbl_user = QLabel("Nom d'utilisateur")
-        lbl_user.setStyleSheet("font-size: 12px; color: #9AA0C4; font-weight: 600;")
+        lbl_user.setStyleSheet("font-size: 12px; color: #64748B; font-weight: 600;")
         self._username = QLineEdit()
         self._username.setPlaceholderText("Entrez votre identifiant")
         self._username.setMinimumHeight(46)
         self._username.setText("admin")
 
         lbl_pass = QLabel("Mot de passe")
-        lbl_pass.setStyleSheet("font-size: 12px; color: #9AA0C4; font-weight: 600;")
+        lbl_pass.setStyleSheet("font-size: 12px; color: #64748B; font-weight: 600;")
         self._password = QLineEdit()
         self._password.setEchoMode(QLineEdit.Password)
         self._password.setPlaceholderText("Entrez votre mot de passe")
@@ -86,7 +89,7 @@ class LoginDialog(QDialog):
 
         hint = QLabel("Accès par défaut : admin / admin123")
         hint.setAlignment(Qt.AlignCenter)
-        hint.setStyleSheet("color: #555878; font-size: 11px;")
+        hint.setStyleSheet("color: #475569; font-size: 11px;")
         form_layout.addWidget(hint)
 
         layout.addWidget(form)

@@ -1,3 +1,4 @@
+from __future__ import annotations
 import bcrypt
 from app.database.connection import db
 
